@@ -98,11 +98,11 @@ export function HourlyForecastChart({ data }: HourlyForecastChartProps) {
                     type="natural"
                     stroke="url(#tempGradient)"
                     strokeWidth={3}
-                    dot={({ cx, cy, payload }) => (
-                        <circle cx={cx} cy={cy} r={5} fill={getColor(payload.temperature)} stroke="hsl(var(--background))" strokeWidth={2} />
+                    dot={({ cx, cy, payload, index }) => (
+                        <circle key={`dot-${index}`} cx={cx} cy={cy} r={5} fill={getColor(payload.temperature)} stroke="hsl(var(--background))" strokeWidth={2} />
                     )}
-                    activeDot={({ cx, cy, payload }) => (
-                        <circle cx={cx} cy={cy} r={7} fill={getColor(payload.temperature)} stroke="hsl(var(--background))" strokeWidth={2} />
+                    activeDot={({ cx, cy, payload, index }) => (
+                        <circle key={`active-dot-${index}`} cx={cx} cy={cy} r={7} fill={getColor(payload.temperature)} stroke="hsl(var(--background))" strokeWidth={2} />
                     )}
                 />
             </LineChart>

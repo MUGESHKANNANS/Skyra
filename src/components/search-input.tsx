@@ -24,9 +24,24 @@ export function SearchInput() {
     }
     setLoadingSuggestions(true);
     try {
-      const result = await autocompleteCity({ partialInput: value });
-      setSuggestions(result.suggestions);
-      setIsPopoverOpen(result.suggestions.length > 0);
+      // Free Tier optimization: We use the OpenWeatherMap API for autocomplete
+      // so it zero-costs your Gemini AI API limits, leaving them strictly for Event Planning!
+      const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
+      const url = `https://api.openweathermap.org/geo/1.0/direct?q=${value}&limit=5&appid=${apiKey}`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (!Array.isArray(data)) throw new Error("Invalid API response");
+
+      // Format city, state, country and remove exact duplicates
+      const formattedCities = data.map((item: any) => {
+        return item.state ? `${item.name}, ${item.state}, ${item.country}` : `${item.name}, ${item.country}`;
+      });
+      const uniqueCities = Array.from(new Set(formattedCities)) as string[];
+
+      setSuggestions(uniqueCities);
+      setIsPopoverOpen(uniqueCities.length > 0);
     } catch (error) {
       console.error("Failed to fetch suggestions:", error);
       setSuggestions([]);

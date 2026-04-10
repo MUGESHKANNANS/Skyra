@@ -12,7 +12,7 @@ interface MapViewProps {
 export function MapView({ center }: MapViewProps) {
   const position = { lat: center.lat, lng: center.lon };
   return (
-    <div className="h-full w-full rounded-lg overflow-hidden">
+    <div className="h-full w-full rounded-lg overflow-hidden shadow">
       <Map
         center={position}
         zoom={10}

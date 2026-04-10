@@ -104,10 +104,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       
       const uvi = await fetchUVI(data.coord.lat, data.coord.lon);
 
-      const newWeather: Weather = {
+      const newWeather: Weather & { temp_min?: number, temp_max?: number } = {
         city: data.name,
         country: data.sys.country,
         temp: data.main.temp,
+        temp_min: data.main.temp_min,
+        temp_max: data.main.temp_max,
         feels_like: data.main.feels_like,
         humidity: data.main.humidity,
         wind_speed: data.wind.speed * 3.6, // m/s to km/h
@@ -121,7 +123,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
       setWeather(newWeather);
       setLocation(newWeather.coord);
-      await fetchForecastData(newWeather.coord.lat, newWeather.coord.lon, forecastDays);
+      await fetchForecastData(newWeather.coord.lat, newWeather.coord.lon, forecastDays, newWeather.temp_max, newWeather.temp_min);
     } catch (err: any) {
       setError(err.message);
       setWeather(null);
@@ -131,7 +133,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [forecastDays]);
 
-  const fetchForecastData = useCallback(async (lat: number, lon: number, days: number) => {
+  const fetchForecastData = useCallback(async (lat: number, lon: number, days: number, currentTempMax?: number, currentTempMin?: number) => {
     try {
       const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`;
       const response = await fetch(url);
@@ -157,10 +159,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return acc;
       }, {});
 
-      let newForecast: Forecast[] = Object.keys(dailyData).slice(0, 5).map(date => {
+      let newForecast: Forecast[] = Object.keys(dailyData).slice(0, 5).map((date, index) => {
         const dayData = dailyData[date];
-        const temp_min = Math.min(...dayData.map((item: any) => item.main.temp_min));
-        const temp_max = Math.max(...dayData.map((item: any) => item.main.temp_max));
+        let temp_min = Math.min(...dayData.map((item: any) => item.main.temp_min));
+        let temp_max = Math.max(...dayData.map((item: any) => item.main.temp_max));
+        
+        // If this is the current day (index === 0), the forecast array might be partial (e.g. only evening remaining)
+        // so we incorporate the currently observed daily min and max from the live weather endpoint.
+        if (index === 0 && currentTempMax !== undefined && currentTempMin !== undefined) {
+            temp_max = Math.max(temp_max, currentTempMax);
+            temp_min = Math.min(temp_min, currentTempMin);
+        }
+
         const centralItem = dayData[Math.floor(dayData.length / 2)];
         return {
           date: date,

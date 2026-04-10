@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Thermometer, Users, Tractor, Menu, Sparkles, Heart, CalendarDays } from "lucide-react";
+import { Home, Thermometer, Users, Tractor, Menu, Sparkles, Heart, CalendarDays, CarFront } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -17,6 +17,7 @@ const navItems = [
   { href: "/suggestions", label: "Smart Farming", icon: Tractor },
   { href: "/health", label: "Health & Safety", icon: Heart },
   { href: "/event-planner", label: "Event Planner", icon: CalendarDays },
+  { href: "/transport", label: "Transport", icon: CarFront },
 ];
 
 export function MainSidebar() {
